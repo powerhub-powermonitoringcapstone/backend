@@ -25,5 +25,9 @@ def readSettings():
     return setArray
 def riteSettings():
     print("Unimplemented yet!")
+def readLogin():
+    print("Unimplemented yet!") ##returns logins from logins.xml
+def mntnLogin():
+    print("Unimplemented yet!") ##purges lapsed login records
     
                 
