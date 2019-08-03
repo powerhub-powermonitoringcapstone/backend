@@ -10,29 +10,17 @@ setWarray = numpy.empty((30), dtype=object)
 def isLogin(fgt):
     now = datetime.datetime.utcnow()
     nowString = now.strftime("%m/%d/%Y %H:%M")
-    x = 0
-    for element in root.findall('login'):
-        try:
-            c = root[x].attrib[fgt]
-            x +=1
-        except KeyError:
-            pass
-        if (datetime.datetime.strptime(root[x].attrib['expires'], '%m/%d/%Y %H:%M') < now):
-            print(False)
+    found = root.find(".//login/[@fgt={}]".format("\""+fgt+"\""))
+    if (datetime.datetime.strptime(found.attrib['expires'], '%m/%d/%Y %H:%M') < now):
+        print(False)
 def newLogin(fgt):
     now = datetime.datetime.utcnow()
     nowString = now.strftime("%m/%d/%Y %H:%M")
-    x = 0
-    for element in root.findall('login'):
-        try:
-            c = root[x].attrib[fgt]
-            x +=1
-        except KeyError:
-            pass
-        root[x].set('expires', 'never')
-        settw = open(cwd + '/logins.xml', 'wb')
-        settings.write(settw)
-        settw.close()
+    found = root.find(".//login/[@fgt={}]".format("\""+fgt+"\""))
+    found.set('expires', 'nowString') 
+    settw = open(cwd + '/logins.xml', 'wb')
+    settings.write(settw)
+    settw.close()
         ##if (datetime.datetime.strptime(root[x].attrib['expires'], '%m/%d/%Y %H:%M') < now):
 ##            print(False)
 ##    x = 0
