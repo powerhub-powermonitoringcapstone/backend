@@ -12,7 +12,7 @@ def settFile():
 def retCwd():
     return cwd
 def readSettings():
-    x = y = 0
+    x = 0
     d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6}
     for element in root:
         try:
@@ -25,9 +25,5 @@ def readSettings():
     return setArray
 def riteSettings():
     print("Unimplemented yet!")
-def readLogin():
-    print("Unimplemented yet!") ##returns logins from logins.xml
-def mntnLogin():
-    print("Unimplemented yet!") ##purges lapsed login records
     
                 
