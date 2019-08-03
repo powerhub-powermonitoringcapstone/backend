@@ -5,4 +5,4 @@ what works behind the scenes
 /home/capstone/codebase
 
 # how to commit?
-simply drag the codebase folder...
+kaw na bahala dyan chong
