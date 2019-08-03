@@ -15,9 +15,9 @@ def isLogin(fgt):
         print(False)
 def newLogin(fgt):
     now = datetime.datetime.utcnow()
-    nowString = now.strftime("%m/%d/%Y %H:%M")
+    nowString = (now + datetime.timedelta(minutes = 10)).strftime("%m/%d/%Y %H:%M")
     found = root.find(".//login/[@fgt={}]".format("\""+fgt+"\""))
-    found.set('expires', 'nowString') 
+    found.set('expires', nowString) 
     settw = open(cwd + '/logins.xml', 'wb')
     settings.write(settw)
     settw.close()
