@@ -1,5 +1,6 @@
 <login>
-    <!--logins-->
-    <login fgt="365735876" expires="7/7/2019 20:12" type="user" interval="10"></login>
-    <!--times should be UTC-->
+    
+    <login expires="never" fgt="365735876" interval="10" type="user" />
+    <login expires="neever" fgt="369995876" interval="10" type="user" />
+    <login expires="nefver" fgt="365995876" interval="10" type="user" />
 </login>
