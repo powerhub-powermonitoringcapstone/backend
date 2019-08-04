@@ -16,6 +16,8 @@ def isLogin(fgt):
     else:
         if (datetime.datetime.strptime(found.attrib['expires'], '%m/%d/%Y %H:%M') < now):
             return(False)
+        else:
+            return(True)
 def newLogin(fgt):
     mntnLogin()
     now = datetime.datetime.utcnow()
