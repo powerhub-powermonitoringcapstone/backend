@@ -7,7 +7,12 @@ settings = ET.parse(sett)
 root = settings.getroot()
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
+def Write():
+    settw = open (cwd + '/logins.xml', 'wb')
+    settings.write(settw)
+    settw.close()
 def isLogin(fgt):
+    fgt = str(fgt)
     now = datetime.datetime.utcnow()
     nowString = now.strftime("%m/%d/%Y %H:%M")
     found = root.find(".//logind/[@fgt={}]".format("\""+fgt+"\""))
@@ -15,10 +20,13 @@ def isLogin(fgt):
         return False
     else:
         if (datetime.datetime.strptime(found.attrib['expires'], '%m/%d/%Y %H:%M') < now):
+            root.remove(found)
+            Write()
             return(False)
         else:
             return(True)
 def newLogin(fgt):
+    fgt = str(fgt)
     mntnLogin()
     now = datetime.datetime.utcnow()
     nowString = (now + datetime.timedelta(minutes = 10)).strftime("%m/%d/%Y %H:%M")
@@ -27,15 +35,12 @@ def newLogin(fgt):
         root.append(ET.Element("logind", {'expires': nowString, 'fgt': fgt, 'interval':"10"}))
     else:
         found.set('expires', nowString)
-    settw = open(cwd + '/logins.xml', 'wb')
-    settings.write(settw)
-    settw.close()
+    Write()
 def mntnLogin():
     found = root.findall(".logind")[19:]
     for elem in found:
         root.remove(elem)
-    settw = open (cwd + '/logins.xml', 'wb')
-    settings.write(settw)
-    settw.close()
+    Write()
+    
     
                 
