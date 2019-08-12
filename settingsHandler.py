@@ -2,9 +2,9 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import os, platform, numpy
 cwd = os.path.dirname(os.path.realpath(__file__))#take note this doesnt work when os.chdir() is called!
-sett = open(cwd + '/settings.xml', 'r+')
-settings = ET.parse(sett)
-root = settings.getroot()
+##sett = open(cwd + '/settings.xml', 'r+')
+##settings = ET.parse(sett)
+##root = settings.getroot()
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 def settFile():
@@ -12,17 +12,20 @@ def settFile():
 def retCwd():
     return cwd
 def readSettings():
-    x = 0
-    d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6}
-    for element in root:
-        try:
-            c = d[root[x].attrib['name']]
-            setArray[c] = root[x].text
-            x +=1
-        except KeyError:
-            pass
-    #sanity checks here
-    return setArray
+    with open(cwd +'/settings.xml', 'r') as sett:
+        settings = ET.parse(sett)
+        root = settings.getroot()
+        x = 0
+        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6}
+        for element in root:
+            try:
+                c = d[root[x].attrib['name']]
+                setArray[c] = root[x].text
+                x +=1
+            except KeyError:
+                pass
+        #sanity checks here
+        return setArray
 def riteSettings():
     print("Unimplemented yet!")
     
