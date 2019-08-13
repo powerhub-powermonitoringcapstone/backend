@@ -5,7 +5,7 @@
     <main name="DataLogging">False</main>
     <main name="Debug">False</main>
     <!--server settings!-->
-    <server name="NodeName">PowerHub_xxxxxx</server>
+    <server name="NodeName">PowerHub_shnapshtone</server>
     <server name="Version">1.25b</server>
     <server name="NodeType">Central</server>
 </settings>
