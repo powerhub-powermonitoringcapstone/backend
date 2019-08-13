@@ -2,15 +2,15 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import os, platform, numpy
 cwd = os.path.dirname(os.path.realpath(__file__))#take note this doesnt work when os.chdir() is called!
-##sett = open(cwd + '/settings.xml', 'r+')
-##settings = ET.parse(sett)
-##root = settings.getroot()
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
-def settFile():
-    return sett
-def retCwd():
-    return cwd
+try:
+    sett = open(cwd+'/settings.xml', 'r')
+    sett.close()
+except IOError:
+    sett = open(cwd+'/settings.xml', 'w')
+    sett.write("<settings></settings>")
+    sett.close()
 def readSettings():
     with open(cwd +'/settings.xml', 'r') as sett:
         settings = ET.parse(sett)

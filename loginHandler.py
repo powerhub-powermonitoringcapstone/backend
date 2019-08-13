@@ -1,7 +1,7 @@
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import os, platform, numpy, datetime
-cwd = os.path.dirname(os.path.realpath(__file__))#take note this doesnt work when os.chdir() is called!
+cwd = os.path.dirname(os.path.realpath(__file__))
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 def mntnLogin():
