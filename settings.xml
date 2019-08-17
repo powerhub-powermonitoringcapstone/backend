@@ -8,4 +8,5 @@
     <server name="NodeName">PowerHub_shnapshtone</server>
     <server name="Version">1.25b</server>
     <server name="NodeType">Central</server>
+    <server name="Permanence">60</server>
 </settings>

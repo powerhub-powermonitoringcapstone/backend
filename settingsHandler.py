@@ -1,7 +1,7 @@
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import os, platform, numpy
-cwd = os.path.dirname(os.path.realpath(__file__))#take note this doesnt work when os.chdir() is called!
+cwd = os.path.dirname(os.path.realpath(__file__))
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 try:
@@ -16,7 +16,7 @@ def readSettings():
         settings = ET.parse(sett)
         root = settings.getroot()
         x = 0
-        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6}
+        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6,'Permanence':7}
         for element in root:
             try:
                 c = d[root[x].attrib['name']]
