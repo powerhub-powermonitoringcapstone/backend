@@ -11,9 +11,8 @@ def mntnLogin():
         found = root.findall(".logind")[19:]
         for elem in found:
             root.remove(elem)
-        settw = open (cwd + '/logins.xml', 'wb')
-        settings.write(settw)
-        settw.close()
+        with open (cwd + '/logins.xml', 'wb') as settw:
+            settings.write(settw)
 def isLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as sett:
@@ -32,9 +31,11 @@ def isLogin(fgt):
 ##                return(False)
 ##            else:
 ##                return(True)
-        settw = open (cwd + '/logins.xml', 'wb')
-        settings.write(settw)
-        settw.close()
+##        with open (cwd + '/logins.xml', 'wb') as settw:
+##            settings.write(settw)
+def clear():
+    with open (cwd + '/logins.xml', 'w') as sett:
+        sett.write('<login></login>')
 def newLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as sett:
@@ -48,9 +49,11 @@ def newLogin(fgt):
             root.append(ET.Element("logind", {'fgt': fgt}))#{'expires': nowString, 'fgt': fgt, 'interval':"10"}))
         else:
             found.set('fgt', fgt)
-        settw = open (cwd + '/logins.xml', 'wb')
-        settings.write(settw)
-        settw.close()
+        with open (cwd + '/logins.xml', 'wb') as settw:
+            settings.write(settw)
+
+
+
 
     
     
