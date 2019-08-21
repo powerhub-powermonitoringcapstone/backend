@@ -1,0 +1,26 @@
+<data>
+<dummy voltage="230" current="2.3">1</dummy>
+<dummy voltage="230" current="2.5">2</dummy>
+<dummy voltage="230" current="2.5">3</dummy>
+<dummy voltage="230" current="2.3">4</dummy>
+<dummy voltage="230" current="2.0">5</dummy>
+<dummy voltage="230" current="1.9">6</dummy>
+<dummy voltage="230" current="1.8">7</dummy>
+<dummy voltage="230" current="1.0">8</dummy>
+<dummy voltage="230" current="5">9</dummy>
+<dummy voltage="230" current="5">10</dummy>
+<dummy voltage="230" current="5">11</dummy>
+<dummy voltage="230" current="5">12</dummy>
+<dummy voltage="230" current="10">13</dummy>
+<dummy voltage="230" current="10">14</dummy>
+<dummy voltage="230" current="9.8">15</dummy>
+<dummy voltage="230" current="9">16</dummy>
+<dummy voltage="230" current="9">17</dummy>
+<dummy voltage="230" current="9">18</dummy>
+<dummy voltage="230" current="9">19</dummy>
+<dummy voltage="230" current="8.9">20</dummy>
+<dummy voltage="230" current="9">21</dummy>
+<dummy voltage="230" current="9">22</dummy>
+<dummy voltage="230" current="9">23</dummy>
+<dummy voltage="230" current="9">24</dummy>
+</data>
