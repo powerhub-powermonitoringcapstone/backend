@@ -1,5 +1,6 @@
 ## DATA LOGGING AND GRAPHING HANDLER SUBPROGRAM
 ## ALL CODE (C)2019
+## DEPRECATED
 import os, platform, csv, numpy, datetime
 cwd = os.path.dirname(os.path.realpath(__file__))
 if (platform.system()[:7] == 'Windows'): 
