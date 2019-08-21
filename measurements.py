@@ -17,6 +17,7 @@ def data():
 msThread = threading.Thread(target=data)
 msThread.start()
 ##main loop
+x = 0
 try:
     sett = open(cwd+'/measurements.xml', 'r')
     sett.close()
@@ -25,13 +26,14 @@ except IOError:
     sett.write("<measurements></measurements>")
     sett.close()
 while True:
+    x+=1
     with open(cwd+'/measurements.xml', 'r') as sett:
         now = datetime.datetime.now()
         msFile = ET.parse(sett)
         root = msFile.getroot()
         msData = rawdata.get()
         rawdata.task_done()
-        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(30), 'date': now.strftime("%m/%d/%Y %H:%M:%S")}))
+        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(30), 'date': now.strftime("%m/%d/%Y %H:%M:%S"), 'n': str(x)}))
         with open (cwd + '/measurements.xml', 'wb') as settw:
             msFile.write(settw)
             settw.close()
