@@ -1,19 +1,18 @@
 import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET 
 cwd = os.path.dirname(os.path.realpath(__file__))
-rawdata = queue.Queue(360)
-##implement as separate thread
+dataq = queue.Queue(1)
+##actual measuring
 def data():
     while True:
         with open(cwd+'/data.xml', 'r') as sett:
             stuff = ET.parse(sett)
             root = stuff.getroot()
             for element in root.findall("./dummy"):
-                rawdata.put({"voltage": element.attrib['voltage'],\
+                dataq.put({"voltage": element.attrib['voltage'],\
                              "current":element.attrib['current'],\
                              "n": element.text\
                              })
-        rawdata.join()
-        time.sleep(1)
+        dataq.join()
 msThread = threading.Thread(target=data)
 msThread.start()
 ##main loop
@@ -31,8 +30,8 @@ while True:
         now = datetime.datetime.now()
         msFile = ET.parse(sett)
         root = msFile.getroot()
-        msData = rawdata.get()
-        rawdata.task_done()
+        msData = dataq.get()
+        dataq.task_done()
         root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(30), 'date': now.strftime("%m/%d/%Y %H:%M:%S"), 'n': str(x)}))
         with open (cwd + '/measurements.xml', 'wb') as settw:
             msFile.write(settw)
