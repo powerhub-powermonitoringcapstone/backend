@@ -1,3 +1,6 @@
+##VOLTAGE ITERATOR (C) POWERHUB
+##ABSORBED INTO MEASUREMENTS.PY
+
 import time, math, os, threading, queue, numpy
 cwd = os.path.dirname(os.path.realpath(__file__))#take note this doesnt work when os.chdir() is called!
 measurements = queue.Queue(360)

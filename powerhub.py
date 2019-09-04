@@ -1,4 +1,6 @@
 ## POWERHUB MAIN PROGRAM CODE (C) 2019
+## Poor attempt at a UI
+## DEPRECATED
 import tkinter as tk
 def showMain():
     mainf = tk.Frame(subf,height=508, width=800)
