@@ -4,6 +4,11 @@ import os, platform, numpy, datetime
 cwd = os.path.dirname(os.path.realpath(__file__))
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
+try:
+    open(cwd + '/logins.xml', 'r')
+except IOError:
+    with open (cwd+ '/logins.xml', 'w') as settw:
+        settw.write('<login></login>')
 def mntnLogin():
     with open(cwd + '/logins.xml', 'r') as sett:
         settings = ET.parse(sett)
