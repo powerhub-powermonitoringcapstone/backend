@@ -8,9 +8,25 @@ try:
     sett = open(cwd+'/settings.xml', 'r')
     sett.close()
 except IOError:
-    sett = open(cwd+'/settings.xml', 'w')
-    sett.write("<settings></settings>")
-    sett.close()
+    with open(cwd+'/settings.xml', 'w') as sett: 
+        sett.write("<settings></settings>")
+        sett.close()
+def riteSettings(f, g): ##index number, pamalit na value
+    with open(cwd + '/settings.xml', 'r') as sett:
+        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2\
+             ,'Debug':3, 'NodeName':4, 'Version':5 , 'NodeType':6,\
+             'Permanence':7}
+        settings = ET.parse(sett)
+        root = settings.getroot()
+        x = 0
+        for element in root:
+            if (f == d[root[x].attrib['name']]):
+                root[x].text = g
+            x+=1
+        with open(cwd + '/settings.xml', 'wb') as settw:
+            settings.write(settw)
+            settw.close()
+        ## wala pang data validity checker ah
 def readSettings():
     with open(cwd +'/settings.xml', 'r') as sett:
         settings = ET.parse(sett)
@@ -26,7 +42,6 @@ def readSettings():
                 pass
         #sanity checks here
         return setArray
-def riteSettings():
-    print("Unimplemented yet!")
+
     
                 

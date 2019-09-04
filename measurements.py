@@ -1,4 +1,4 @@
-import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET 
+import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 ##actual measuring
