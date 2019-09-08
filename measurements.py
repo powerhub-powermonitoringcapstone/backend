@@ -16,7 +16,7 @@ def data():
 msThread = threading.Thread(target=data)
 msThread.start()
 ##main loop
-x = 0
+x = wsigma = 0
 try:
     sett = open(cwd+'/measurements.xml', 'r')
     sett.close()
@@ -32,7 +32,11 @@ while True:
         root = msFile.getroot()
         msData = dataq.get()
         dataq.task_done()
-        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(30), 'date': now.strftime("%m/%d/%Y %H:%M:%S"), 'n': str(x)}))
+        wsigma += float(msData["voltage"]) * float(msData["current"])
+        cv = float(msData["voltage"]) * float(msData["current"])
+        cv /= (wsigma/x)
+        cv *= 100
+        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(cv), 'date': now.strftime("%m/%d/%Y %H:%M:%S"), 'n': str(x), 'mu': str(wsigma/x)}))
         with open (cwd + '/measurements.xml', 'wb') as settw:
             msFile.write(settw)
             settw.close()
