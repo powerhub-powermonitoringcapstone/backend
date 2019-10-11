@@ -1,8 +1,8 @@
 <settings>
     
     <main name="IsSetup">False</main>
-    <main name="SensitivityThreshold">50</main>
-    <main name="DataLogging">False</main>
+    <main name="SensitivityThreshold">50</main> <!--actual cv value-->
+    <main name="DataLogging">True</main>
     <main name="Debug">False</main>
     
     <server name="NodeName">PowerHub_shnapshtone</server>
