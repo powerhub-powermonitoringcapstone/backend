@@ -15,7 +15,7 @@ def riteSettings(f, g): ##index number, pamalit na value
     with open(cwd + '/settings.xml', 'r') as sett:
         d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2\
              ,'Debug':3, 'NodeName':4, 'Version':5 , 'NodeType':6,\
-             'Permanence':7}
+             'Permanence':7, 'CarbonFootprint':8}
         settings = ET.parse(sett)
         root = settings.getroot()
         x = 0
@@ -32,7 +32,7 @@ def readSettings():
         settings = ET.parse(sett)
         root = settings.getroot()
         x = 0
-        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6,'Permanence':7}
+        d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6,'Permanence':7,'CarbonFootprint':8}
         for element in root:
             try:
                 c = d[root[x].attrib['name']]
