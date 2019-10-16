@@ -4,6 +4,7 @@
     <main name="SensitivityThreshold">50</main> <!--actual cv value-->
     <main name="DataLogging">True</main>
     <main name="Debug">False</main>
+    <main name="CarbonFootprint">0.266785714</main>
     
     <server name="NodeName">PowerHub_shnapshtone</server>
     <server name="Version">1.25b</server>
