@@ -29,7 +29,7 @@ while True:
     x+=1
     with open(cwd+'/measurements.xml', 'r') as sett:
         notify = "False"
-        now = datetime.datetime.now()
+        now = datetime.now(timezone.utc)
         msFile = ET.parse(sett)
         root = msFile.getroot()
         msData = dataq.get()
