@@ -10,6 +10,7 @@ def data():
             for element in root.findall("./dummy"):
                 dataq.put({"voltage": element.attrib['voltage'],\
                              "current":element.attrib['current'],\
+                           "pf":element.attrib['pf'],
                              "n": element.text\
                              })
         dataq.join()
@@ -29,13 +30,13 @@ while True:
     x+=1
     with open(cwd+'/measurements.xml', 'r') as sett:
         notify = "False"
-        now = datetime.now(timezone.utc)
+        now = datetime.datetime.now(datetime.timezone.utc)
         msFile = ET.parse(sett)
         root = msFile.getroot()
         msData = dataq.get()
         dataq.task_done()
-        wsigma += float(msData["voltage"]) * float(msData["current"])
-        cv = float(msData["voltage"]) * float(msData["current"])
+        wsigma += float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
+        cv = float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
         cv /= (wsigma/x)
         cv *= 100
         cv -= 100
@@ -48,7 +49,9 @@ while True:
         if (sig >= 5 and insig <= 5):
             sig = insig = 0
             notify = "True"
-        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]), 'variation':str(cv), 'date': now.strftime("%m/%d/%Y %H:%M:%S"), 'n': str(x), 'mu': str(wsigma/x), 'notify': notify}))
+        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
+                                       'variation':str(cv), 'date': now.strftime("%m/%d/%Y %H:%M:%S"),\
+                                       'n': str(x), 'mu': str(wsigma/x), 'notify': notify, 'pf':str(msData["pf"])}))##'wattage': str(float(msData["voltage"])*float(msData["current"])*float(msData["pf"])),
         with open (cwd + '/measurements.xml', 'wb') as settw:
             msFile.write(settw)
             settw.close()

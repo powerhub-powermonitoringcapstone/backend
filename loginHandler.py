@@ -6,7 +6,7 @@ setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 try:
     open(cwd + '/logins.xml', 'r')
-except IOError:
+except FileNotFoundError:
     with open (cwd+ '/logins.xml', 'w') as settw:
         settw.write('<login></login>')
 def mntnLogin():

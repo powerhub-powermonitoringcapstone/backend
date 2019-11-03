@@ -34,12 +34,13 @@ def readSettings():
         x = 0
         d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2,'Debug':3, 'NodeName':4,'Version':5,'NodeType':6,'Permanence':7,'CarbonFootprint':8}
         for element in root:
+            print(element.attrib['name'])
             try:
                 c = d[root[x].attrib['name']]
                 setArray[c] = root[x].text
-                x +=1
             except KeyError:
                 pass
+            x +=1
         #sanity checks here
         return setArray
 
