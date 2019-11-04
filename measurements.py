@@ -51,7 +51,7 @@ while True:
             notify = "True"
         root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
                                        'variation':str(cv), 'date': now.strftime("%m/%d/%Y %H:%M:%S"),\
-                                       'n': str(x), 'mu': str(wsigma/x), 'notify': notify, 'pf':str(msData["pf"])}))##'wattage': str(float(msData["voltage"])*float(msData["current"])*float(msData["pf"])),
+                                       'n': str(x), 'mu': str(wsigma/x), 'notify': notify, 'pf':str(msData["pf"])}))
         with open (cwd + '/measurements.xml', 'wb') as settw:
             msFile.write(settw)
             settw.close()
