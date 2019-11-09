@@ -6,18 +6,19 @@ port = serial.Serial('/dev/ttyACM0', 9600) ## first USB port
 def data():
     n = 0
     while True:
-        n += 1
         if (port.read(1)==b'-'):
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
             try:
                 voltage = float(stuff[0])
                 current = float(stuff[1])
                 pf = float(stuff[4])
-                dataq.put({"voltage": voltage,\
-                           "current": current,\
-                            "pf": pf,\
-                            "n": n\
-                           })
+                n += 1
+                if (not math.isnan(voltage)):
+                    dataq.put({"voltage": voltage,\
+                               "current": current,\
+                                "pf": pf,\
+                                "n": n\
+                               })
             except ValueError:
                 pass
         dataq.join()                
