@@ -21,7 +21,7 @@ def data():
                                })
             except ValueError:
                 pass
-        dataq.join()                
+        dataq.join()
 ##        with open(cwd+'/data.xml', 'r') as sett:
 ##            stuff = ET.parse(sett)
 ##            root = stuff.getroot()
