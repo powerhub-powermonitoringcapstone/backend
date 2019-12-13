@@ -6,6 +6,7 @@ port = serial.Serial('/dev/ttyACM0', 9600) ## first USB port
 def data():
     n = 0
     while True:
+        dataq.join()
         if (port.read(1)==b'-'):
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
             try:
@@ -21,7 +22,6 @@ def data():
                                })
             except ValueError:
                 pass
-        dataq.join()
 ##        with open(cwd+'/data.xml', 'r') as sett:
 ##            stuff = ET.parse(sett)
 ##            root = stuff.getroot()
