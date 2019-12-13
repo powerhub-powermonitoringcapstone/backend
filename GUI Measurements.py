@@ -107,7 +107,7 @@ def data():
     global threadstop
     port = serial.Serial(measurements_.serialentry.get(), 9600)
     while threadstop[1] == False:
-        dataq.join()
+##        dataq.join()
 ##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
 ##                   "current": 4,\
 ##                   "pf": 1,\
@@ -117,6 +117,7 @@ def data():
         if (port.read(1)==b'-'):
             dataq.join()
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
+            port.flushInput()
             try:
                 voltage = float(stuff[0])
                 current = float(stuff[1])
@@ -171,7 +172,7 @@ def saving():
                     sig += 1
                 else:
                     insig += 1
-                if (sig >= 5 and insig <= 5):
+                if (sig >= 8 and insig <= 5):
                     sig = insig = 0
                     notify = "True"
                 root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
@@ -180,6 +181,7 @@ def saving():
                 with open (cwd + '/measurements.xml', 'wb') as settw:
                     msFile.write(settw)
                     settw.close()
+                time.sleep(1)
     threadstop[1] = True
     threadstop[2] = True
     sys.exit()
