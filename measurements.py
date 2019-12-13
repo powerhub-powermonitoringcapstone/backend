@@ -14,6 +14,7 @@ def data():
                 current = float(stuff[1])
                 pf = float(stuff[4])
                 n += 1
+##                print (voltage, current, pf, n)
                 if (not math.isnan(voltage)):
                     dataq.put({"voltage": voltage,\
                                "current": current,\
