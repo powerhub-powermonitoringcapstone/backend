@@ -2,8 +2,8 @@ import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, s
 import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
-datathread = msthread = 0
-threadstop = [False,False] ##saving, data collection
+datathread = msthread = msdata = readoutsthread = 0
+threadstop = [False,False,False] ##saving, data collection, readings update
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
         tk.Entry.__init__(self, master, **kwargs)
@@ -109,10 +109,10 @@ class about(tk.Frame):
 
 def data():
     global threadstop
-    port = serial.Serial('/dev/ttyACM0', 9600)
+    port = serial.Serial(measurements_.serialentry.get(), 9600)
     while threadstop[1] == False:
-        dataq.join()
         if (port.read(1)==b'-'):
+            dataq.join()
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
             try:
                 voltage = float(stuff[0])
@@ -126,10 +126,20 @@ def data():
             except ValueError:
                 pass
     sys.exit()
+def readouts():
+    global threadstop, msData
+    while threadstop[2]==False:
+        measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
+        measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
+        measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
+        measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")
+        time.sleep(1)
+    sys.exit()
 def saving():
-    global threadstop, msthread
+    global threadstop, msthread, msData, readoutsthread
     msthread = threading.Thread(target=data)
     msthread.start()
+    readoutsthread = threading.Thread(target=readouts)
     x = wsigma = insig = sig =  0
     cv_ = float(sh.readSettings()[2])
     while threadstop[0]==False:
@@ -137,15 +147,14 @@ def saving():
             msData = dataq.get()
             dataq.task_done()
             x+=1
+            if (x==1):
+                readoutsthread.start()
             with open(cwd+'/measurements.xml', 'r') as sett:
                 notify = "False"
-                now = datetime.datetime.now(datetime.timezone.utc)
                 msFile = ET.parse(sett)
                 root = msFile.getroot()
-                msData = dataq.get()
-                dataq.task_done()
-                wsigma += float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
-                cv = float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
+                wsigma += msData["voltage"]* msData["current"] * msData["pf"]
+                cv = msData["voltage"] * msData["current"] * msData["pf"]
                 try:
                     cv /= (wsigma/x)    
                 except ZeroDivisionError:
@@ -161,18 +170,14 @@ def saving():
                 if (sig >= 5 and insig <= 5):
                     sig = insig = 0
                     notify = "True"
-                print("yuh")
-                measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
-                measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
-                measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
-                measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf']) + " W")
                 root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
-                                               'variation':str(cv), 'date': now.strftime("%m/%d/%Y %H:%M:%S"),\
-                                               'n': str(x), 'mu': str(wsigma/x), 'notify': notify, 'pf':str(msData["pf"])}))
+                                               'variation':str(cv), 'date': datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S"),\
+                                               'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
                 with open (cwd + '/measurements.xml', 'wb') as settw:
                     msFile.write(settw)
                     settw.close()
     threadstop[1] = True
+    threadstop[2] = True
     sys.exit()
 
 
@@ -183,7 +188,7 @@ class connect():
         self.permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
         self.output = [self.permissions.returncode, self.permissions.stdout, self.permissions.stderr]
         if (self.output[0] == 1):
-            messagebox.showerror("An error occured.", output[2])
+            messagebox.showerror("An error occured.", self.output[2])
         else:
             if (datathread == 0):
                 datathread = threading.Thread(target=saving)
