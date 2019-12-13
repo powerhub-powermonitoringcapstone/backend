@@ -83,10 +83,6 @@ class measurements(tk.Frame):
         self.notification.pack(anchor=tk.W)
         self.readoutsframe.pack(anchor=tk.N)
         self.frame.pack()
-    def update(self):
-        self.ozawa.config(text="Node name: " + self.req.json()['nodename'])
-        self.name2.config(text="Node type: " + self.req.json()['nodetype'])
-        print (self.req.text)
 
 class sett(tk.Frame):
     def __init__(self,parent):
@@ -111,6 +107,13 @@ def data():
     global threadstop
     port = serial.Serial(measurements_.serialentry.get(), 9600)
     while threadstop[1] == False:
+        dataq.join()
+##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
+##                   "current": 4,\
+##                   "pf": 1,\
+##                   "date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")\
+##                   }) 
+##        time.sleep(1) ##End of Latency Tester
         if (port.read(1)==b'-'):
             dataq.join()
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
@@ -121,7 +124,8 @@ def data():
                 if (not math.isnan(voltage)):
                     dataq.put({"voltage": voltage,\
                                "current": current,\
-                                "pf": pf,\
+                               "pf": pf,\
+                               "date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")\
                                })
             except ValueError:
                 pass
@@ -153,14 +157,14 @@ def saving():
                 notify = "False"
                 msFile = ET.parse(sett)
                 root = msFile.getroot()
-                wsigma += msData["voltage"]* msData["current"] * msData["pf"]
                 cv = msData["voltage"] * msData["current"] * msData["pf"]
+                wsigma += cv
                 try:
-                    cv /= (wsigma/x)    
+                    cv /= (wsigma/x)
+                    cv *= 100
+                    cv -= 100
                 except ZeroDivisionError:
                     pass
-                cv *= 100
-                cv -= 100
                 if (insig > 11):
                     insig = 0
                 if (cv >= cv_):
@@ -171,7 +175,7 @@ def saving():
                     sig = insig = 0
                     notify = "True"
                 root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
-                                               'variation':str(cv), 'date': datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S"),\
+                                               'variation':str(cv), 'date': msData["date"],\
                                                'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
                 with open (cwd + '/measurements.xml', 'wb') as settw:
                     msFile.write(settw)
