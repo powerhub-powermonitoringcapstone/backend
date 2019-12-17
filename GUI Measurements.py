@@ -3,7 +3,8 @@ import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.El
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 datathread = msthread = msdata = readoutsthread = 0
-threadstop = [False,False,False] ##saving, data collection, readings update
+threadstop = [False,False,False] ##data collection, saving, readings update
+##saving, data collection, readings update
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
         tk.Entry.__init__(self, master, **kwargs)
@@ -107,7 +108,8 @@ class about(tk.Frame):
 def data():
     global threadstop
     port = serial.Serial(measurements_.serialentry.get(), 9600)
-    while threadstop[1] == False:
+    while threadstop[0] == False:
+        print (threadstop[0])
 ##        dataq.join()
 ##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
 ##                   "current": 4,\
@@ -116,7 +118,6 @@ def data():
 ##                   }) 
 ##        time.sleep(1) ##End of Latency Tester
         if (port.read(1)==b'-'):
-            dataq.join()
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
             try:
                 voltage = float(stuff[0])
@@ -128,9 +129,12 @@ def data():
                                "pf": pf,\
                                "date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")\
                                })
+                    dataq.join()
             except ValueError:
                 pass
         port.flushInput()
+    print("Data collection stopping ...")
+    threadstop[1] = True
     sys.exit()
 def readouts():
     global threadstop, msData
@@ -143,6 +147,7 @@ def readouts():
         except tk.TclError:
             pass
         time.sleep(0.25)
+    print("Readouts stopping ...")
     sys.exit()
 def saving():
     global threadstop, msthread, msData, readoutsthread
@@ -151,7 +156,7 @@ def saving():
     readoutsthread = threading.Thread(target=readouts)
     x = wsigma = insig = sig =  0
     cv_ = float(sh.readSettings()[2])
-    while threadstop[0]==False:
+    while threadstop[1]==False:
         if (dataq.full()):
             msData = dataq.get()
             dataq.task_done()
@@ -186,7 +191,7 @@ def saving():
                     msFile.write(settw)
                     settw.close()
                 time.sleep(1)
-    threadstop[1] = True
+    print("Data saving stopping ...")
     threadstop[2] = True
     sys.exit()
 
