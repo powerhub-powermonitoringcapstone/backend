@@ -29,7 +29,7 @@ class viewchanger(tk.Frame):
         self.viewf = tk.Frame(self.parent)
         self.butt1 = tk.Button(self.viewf, text="Measurements", command=self.measurements)
         self.butt1.pack(side="left")
-        self.butt2 = tk.Button(self.viewf, text="Email / Notifications", command=self.settings)
+        self.butt2 = tk.Button(self.viewf, text="Email / Notifications", command=self.notifs)
         self.butt2.pack(side="left")
         self.butt3 = tk.Button(self.viewf, text="Server", command=self.teardown)
         self.butt3.pack(side="left")
@@ -40,18 +40,18 @@ class viewchanger(tk.Frame):
     def teardown(self):
         try:
             measurements_.frame.destroy()
-            set_.settings.destroy()
-            about__.aboutfr.destroy()
+            notifs_.frame.destroy()
+            about__.frame.destroy()
         except (NameError, AttributeError) as e:
             pass
     def measurements(self):
         global measurements_
         self.teardown()
         measurements_ = measurements(self.parent)
-    def settings(self):
-        global set_
+    def notifs(self):
+        global notifs_
         self.teardown()
-        set_ = sett(self.parent)
+        notifs_ = notifs(self.parent)
     def about_(self):
         global about__
         self.teardown()
@@ -84,24 +84,25 @@ class measurements(tk.Frame):
         self.readoutsframe.pack(anchor=tk.N)
         self.frame.pack()
 
-class sett(tk.Frame):
+class notifs(tk.Frame):
     def __init__(self,parent):
         tk.Frame.__init__(self,parent)
         self.parent = parent
-        self.settings = tk.Frame(self.parent)
-        self.settext = tk.Label(self.settings, text="HowerPub")
-        self.settext.pack(side="top")
-        self.settings.pack()
+        self.frame = tk.Frame(self.parent)
+        self.text = tk.Label(self.frame, text="Email / Notification Settings")
+        self.text.pack(side="top")
+        self.frame.pack()
 
 class about(tk.Frame):
     def __init__(self,parent):
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.aboutfr = tk.Frame(self.parent)
-        self.abouttx = tk.Label(self.aboutfr, text="PowerHub is a prototype created \n\
-        for the partial fulfillment of the Capstone Experience Program.")
-        self.abouttx.pack(side="top")
-        self.aboutfr.pack()
+        self.frame = tk.Frame(self.parent)
+        self.text = tk.Label(self.frame, text="PowerHub is a prototype created \n\
+        for the partial fulfillment of the Capstone Experience Program.\n\n\
+        Authors of the Study:\n - Jericho Rejuso, layout and design\n - Khalil Ubalde, lead programmer")
+        self.text.pack(side="top")
+        self.frame.pack()
 
 def data():
     global threadstop
@@ -117,7 +118,6 @@ def data():
         if (port.read(1)==b'-'):
             dataq.join()
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
-            port.flushInput()
             try:
                 voltage = float(stuff[0])
                 current = float(stuff[1])
@@ -130,15 +130,19 @@ def data():
                                })
             except ValueError:
                 pass
+        port.flushInput()
     sys.exit()
 def readouts():
     global threadstop, msData
     while threadstop[2]==False:
-        measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
-        measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
-        measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
-        measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")
-        time.sleep(1)
+        try:
+            measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
+            measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
+            measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
+            measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")    
+        except tk.TclError:
+            pass
+        time.sleep(0.25)
     sys.exit()
 def saving():
     global threadstop, msthread, msData, readoutsthread
@@ -185,8 +189,6 @@ def saving():
     threadstop[1] = True
     threadstop[2] = True
     sys.exit()
-
-
 
 class connect():
     def __init__(self):
