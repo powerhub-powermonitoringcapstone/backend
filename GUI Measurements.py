@@ -4,7 +4,6 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 datathread = msthread = msdata = readoutsthread = 0
 threadstop = [False,False,False] ##data collection, saving, readings update
-##saving, data collection, readings update
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
         tk.Entry.__init__(self, master, **kwargs)
