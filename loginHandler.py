@@ -1,7 +1,6 @@
-from xml.dom import minidom
-import xml.etree.ElementTree as ET
-import os, platform, numpy, datetime
-cwd = os.path.dirname(os.path.realpath(__file__))
+##from xml.dom import minidom
+import platform, numpy, datetime, xml.etree.ElementTree as ET, hashlib, uuid, settingsHandler as sh
+cwd = '/home/capstone/codebase'
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 try:
@@ -38,7 +37,7 @@ def isLogin(fgt):
 ##                return(True)
 ##        with open (cwd + '/logins.xml', 'wb') as settw:
 ##            settings.write(settw)
-def clear():
+def clearLogins():
     with open (cwd + '/logins.xml', 'w') as sett:
         sett.write('<login></login>')
 def newLogin(fgt):
@@ -56,7 +55,36 @@ def newLogin(fgt):
             found.set('fgt', fgt)
         with open (cwd + '/logins.xml', 'wb') as settw:
             settings.write(settw)
-
+            
+def authenticate(passkey, fgt):
+    with open(cwd + '/pvt.xml', 'r') as file:
+        data = ET.parse(file)
+        root = data.getroot()
+        localkey = str(root.find(".private").attrib['key'])
+        localsalt = str(root.find(".private").attrib['salt'])
+        auth = passkey + localsalt
+        auth = str(hashlib.sha256(auth.encode('utf-8')).hexdigest())
+        if (auth == localkey):
+            newLogin(fgt)
+            return ("True")
+        else:
+            return ("False")
+        
+def changeKey(passkey, fgt):
+    clearLogins()
+    localsalt = str(uuid.uuid4())
+    localkey = str(hashlib.sha256((str(passkey) + localsalt).encode('utf-8')).hexdigest())
+    if (isLogin(fgt) or sh.readSettings()[0] == "False"):
+        with open(cwd + '/pvt.xml', 'r') as file:
+            data = ET.parse(file)
+            root = data.getroot()
+            found = root.find("./private")
+            found.set('key', localkey)
+            found.set('salt', localsalt)
+            with open (cwd + '/pvt.xml', 'wb') as filew:
+                data.write(filew)
+                filew.close()
+        return ("True")
 
 
 
