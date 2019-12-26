@@ -22,10 +22,9 @@ def isLogin(fgt):
     with open(cwd + '/logins.xml', 'r') as sett:
         settings = ET.parse(sett)
         root = settings.getroot()
-        fgt = str(fgt)
 ##        now = datetime.datetime.utcnow()
 ##        nowString = now.strftime("%m/%d/%Y %H:%M")
-        found = root.find(".//logind/[@fgt={}]".format("\""+fgt+"\""))
+        found = root.find(".//logind/[@fgt={}]".format("\""+str(fgt)+"\""))
         if (found == None):
             return False
         else:

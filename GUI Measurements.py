@@ -108,7 +108,6 @@ def data():
     global threadstop
     port = serial.Serial(measurements_.serialentry.get(), 9600)
     while threadstop[0] == False:
-        print (threadstop[0])
 ##        dataq.join()
 ##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
 ##                   "current": 4,\

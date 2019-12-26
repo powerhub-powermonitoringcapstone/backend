@@ -1,13 +1,13 @@
 <settings>
     
     <main name="IsSetup">True</main>
-    <main name="SensitivityThreshold">50</main> <!--actual cv value-->
-    <main name="RefreshRate">3600</main><!--number of values collected per hour, di pa parsed-->
+    <main name="SensitivityThreshold">50</main> 
+    <main name="RefreshRate">3600</main>
     <main name="DataLogging">True</main>
     <main name="Debug">False</main>
-    <main name="CarbonFootprint">7.47</main><!-- 0.266785714 -->
+    <main name="CarbonFootprint">7.47</main>
     
-    <server name="NodeName">PowerHub_prototype</server>
+    <server name="NodeName">PowerHub_Testing</server>
     <server name="Version">1.25b</server>
     <server name="NodeType">Central</server>
     <server name="Permanence">60</server>

@@ -19,6 +19,7 @@ def riteSettings(f, g): ##index number, pamalit na value
         settings = ET.parse(sett)
         root = settings.getroot()
         x = 0
+        f = int(f)
         for element in root:
             if (f == d[root[x].attrib['name']]):
                 root[x].text = g

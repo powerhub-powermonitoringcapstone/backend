@@ -32,9 +32,10 @@ def data():
 ##                           "pf":element.attrib['pf'],
 ##                             "n": element.text\
 ##                             })
+
+##main loop
 msThread = threading.Thread(target=data)
 msThread.start()
-##main loop
 x = wsigma = insig = sig =  0
 cv_ = float(sh.readSettings()[2])
 try:
@@ -53,6 +54,7 @@ while True:
             msFile = ET.parse(sett)
             root = msFile.getroot()
             msData = dataq.get()
+            print(msData)
             dataq.task_done()
             wsigma += float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
             cv = float(msData["voltage"]) * float(msData["current"]) * float(msData["pf"])
