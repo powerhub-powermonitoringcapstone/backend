@@ -2,8 +2,8 @@ import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, s
 import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
-datathread = msthread = msdata = readoutsthread = 0
-threadstop = [False,False,False] ##data collection, saving, readings update
+datathread = msthread = msdata = readoutsthread = datagtest1thread = 0
+threadactive = [False,False,False,False] ##data collection, data gathering-pseudo data collection, saving, readings update
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
         tk.Entry.__init__(self, master, **kwargs)
@@ -29,17 +29,20 @@ class viewchanger(tk.Frame):
         self.viewf = tk.Frame(self.parent)
         self.butt1 = tk.Button(self.viewf, text="Measurements", command=self.measurements)
         self.butt1.pack(side="left")
-        self.butt2 = tk.Button(self.viewf, text="Email / Notifications", command=self.notifs)
+        self.butt2 = tk.Button(self.viewf, text="Data Gathering Tests", command=self.datagathering)
         self.butt2.pack(side="left")
-        self.butt3 = tk.Button(self.viewf, text="Server", command=self.teardown)
+        self.butt3 = tk.Button(self.viewf, text="Email / Notifications", command=self.notifs)
         self.butt3.pack(side="left")
-        self.butt4 = tk.Button(self.viewf, text="About", command=self.about_)
+        self.butt4 = tk.Button(self.viewf, text="Server", command=self.teardown)
         self.butt4.pack(side="left")
+        self.butt5 = tk.Button(self.viewf, text="About", command=self.about_)
+        self.butt5.pack(side="left")
         self.viewf.pack()
         self.measurements()
     def teardown(self):
         try:
             measurements_.frame.destroy()
+            datagathering_.frame.destroy()
             notifs_.frame.destroy()
             about__.frame.destroy()
         except (NameError, AttributeError) as e:
@@ -48,6 +51,10 @@ class viewchanger(tk.Frame):
         global measurements_
         self.teardown()
         measurements_ = measurements(self.parent)
+    def datagathering(self):
+        global datagathering_
+        self.teardown()
+        datagathering_ = datagathering(self.parent)
     def notifs(self):
         global notifs_
         self.teardown()
@@ -84,6 +91,18 @@ class measurements(tk.Frame):
         self.readoutsframe.pack(anchor=tk.N)
         self.frame.pack()
 
+class datagathering(tk.Frame):
+    def __init__(self,parent):
+        self.parent = parent
+        self.frame = tk.Frame(self.parent)
+        self.test1 = tk.Label(self.frame, text="Notification Framework Test")
+        self.test1b = tk.Button(self.frame, text="Start", command=datagtest1start)
+        self.test1bs = tk.Button(self.frame, text="Stop", command=datagtest1stop)
+        self.test1.grid(row=0,column=0)
+        self.test1b.grid(row=0,column=1)
+        self.test1bs.grid(row=0,column=2)
+        self.frame.pack(anchor=tk.NW)
+
 class notifs(tk.Frame):
     def __init__(self,parent):
         tk.Frame.__init__(self,parent)
@@ -105,9 +124,9 @@ class about(tk.Frame):
         self.frame.pack()
 
 def data():
-    global threadstop
+    global threadactive
     port = serial.Serial(measurements_.serialentry.get(), 9600)
-    while threadstop[0] == False:
+    while threadactive[0] == True:
 ##        dataq.join()
 ##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
 ##                   "current": 4,\
@@ -132,29 +151,85 @@ def data():
                 pass
         port.flushInput()
     print("Data collection stopping ...")
-    threadstop[1] = True
+    threadactive[2] = False
     sys.exit()
+
+def datagatheringtest1():
+    global threadactive, msData, notify
+    x = wsigma = 0
+    threadactive[3] = True
+    readoutsthread = threading.Thread(target=readouts)
+    while threadactive[1] == True:
+        msData = {"voltage":230,"current":5,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
+        x+=1
+        if (x==1):
+            readoutsthread.start()
+        if (x % 10 == 0):
+            notify = "True"
+        else:
+            notify = "False"
+        with open(cwd+'/measurements.xml', 'r') as sett:
+            msFile = ET.parse(sett)
+            root = msFile.getroot()
+            cv = msData["voltage"] * msData["current"] * msData["pf"]
+            wsigma += cv
+            try:
+                cv /= (wsigma/x)
+                cv *= 100
+                cv -= 100
+            except ZeroDivisionError:
+                pass
+            root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
+                                           'variation':str(cv), 'date': msData["date"],\
+                                           'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
+            with open (cwd + '/measurements.xml', 'wb') as settw:
+                msFile.write(settw)
+                settw.close()
+            time.sleep(1)
+    print("Data gathering test 1 stopping ...")
+    threadactive[3] = False
+    sys.exit()
+
+def datagtest1start():
+    global threadactive, datagtest1thread
+    threadactive[1] = True
+    if (datagtest1thread == 0):
+        datagtest1thread = threading.Thread(target=datagatheringtest1)
+    if (not datagtest1thread.isAlive()):
+        datagtest1thread = threading.Thread(target=datagatheringtest1)
+        datagtest1thread.start()
+
+def datagtest1stop():
+    global threadactive
+    threadactive[1] = False
+
 def readouts():
-    global threadstop, msData
-    while threadstop[2]==False:
+    global threadactive, msData, notify
+    while threadactive[3]==True:
         try:
             measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
             measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
             measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
-            measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")    
+            measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")
+            if (notify == "True"):
+                measurements_.notification.config(text='Significant Load')
+            else:
+                measurements_.notification.config(text='Insignificant Load')
         except tk.TclError:
             pass
         time.sleep(0.25)
     print("Readouts stopping ...")
     sys.exit()
+
 def saving():
-    global threadstop, msthread, msData, readoutsthread
+    global threadstop, msthread, msData, readoutsthread, notify
     msthread = threading.Thread(target=data)
     msthread.start()
     readoutsthread = threading.Thread(target=readouts)
     x = wsigma = insig = sig =  0
     cv_ = float(sh.readSettings()[2])
-    while threadstop[1]==False:
+    while threadactive[2]==True:
+        notify = "False"
         if (dataq.full()):
             msData = dataq.get()
             dataq.task_done()
@@ -162,7 +237,6 @@ def saving():
             if (x==1):
                 readoutsthread.start()
             with open(cwd+'/measurements.xml', 'r') as sett:
-                notify = "False"
                 msFile = ET.parse(sett)
                 root = msFile.getroot()
                 cv = msData["voltage"] * msData["current"] * msData["pf"]
@@ -190,25 +264,24 @@ def saving():
                     settw.close()
                 time.sleep(1)
     print("Data saving stopping ...")
-    threadstop[2] = True
+    threadactive[3] = False
     sys.exit()
 
-class connect():
-    def __init__(self):
-        global datathread
-        self.permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-        self.output = [self.permissions.returncode, self.permissions.stdout, self.permissions.stderr]
-        if (self.output[0] == 1):
-            messagebox.showerror("An error occured.", self.output[2])
-        else:
-            if (datathread == 0):
-                datathread = threading.Thread(target=saving)
-            if (not datathread.isAlive()):
-                datathread = threading.Thread(target=saving)
-                datathread.start()
+def connect():
+    global datathread
+    permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+    output = [permissions.returncode, permissions.stdout, permissions.stderr]
+    if (self.output[0] == 1):
+        messagebox.showerror("An error occured.", self.output[2])
+    else:
+        if (datathread == 0):
+            datathread = threading.Thread(target=saving)
+        if (not datathread.isAlive()):
+            datathread = threading.Thread(target=saving)
+            datathread.start()
 def stopconnect():
-    global threadstop
-    threadstop[0] = True
+    global threadactive
+    threadactive[0] = False
 
 class MainInterface(tk.Frame):
     def __init__(self,parent):
