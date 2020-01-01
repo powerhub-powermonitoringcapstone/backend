@@ -185,7 +185,7 @@ def datagatheringtest1():
             with open (cwd + '/measurements.xml', 'wb') as settw:
                 msFile.write(settw)
                 settw.close()
-            time.sleep(1)
+        time.sleep(1)
     print("Data gathering test 1 stopping ...")
     threadactive[3] = False
     sys.exit()
@@ -262,7 +262,7 @@ def saving():
                 with open (cwd + '/measurements.xml', 'wb') as settw:
                     msFile.write(settw)
                     settw.close()
-                time.sleep(1)
+            time.sleep(1)
     print("Data saving stopping ...")
     threadactive[3] = False
     sys.exit()
