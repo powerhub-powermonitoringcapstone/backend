@@ -11,6 +11,7 @@ except FileNotFoundError:
 def mntnLogin():
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
+        file.seek(0)
         root = data.getroot()
         found = root.findall(".logind")[19:]
         for elem in found:
@@ -23,6 +24,7 @@ def isLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
+        file.seek(0)
         root = data.getroot()
         found = root.find(".//logind/[@fgt={}]".format("\""+str(fgt)+"\""))
         file.close()
@@ -39,6 +41,7 @@ def newLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
+        file.seek(0)
         root = data.getroot()
         fgt = str(fgt)
 ##        now = datetime.datetime.utcnow()
@@ -55,8 +58,8 @@ def newLogin(fgt):
         
 def authenticate(passkey, fgt):
     with open(cwd + '/pvt.xml', 'r') as file:
-        file.seek(0)
         data = ET.parse(file)
+        file.seek(0)
         root = data.getroot()
         localkey = str(root.find(".private").attrib['key'])
         localsalt = str(root.find(".private").attrib['salt'])
@@ -74,8 +77,8 @@ def changeKey(passkey, fgt):
     localkey = str(hashlib.sha256((str(passkey) + localsalt).encode('utf-8')).hexdigest())
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         with open(cwd + '/pvt.xml', 'r') as file:
-            file.seek(0)
             data = ET.parse(file)
+            file.seek(0)
             root = data.getroot()
             found = root.find("./private")
             found.set('key', localkey)
