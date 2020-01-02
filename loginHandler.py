@@ -10,6 +10,7 @@ except FileNotFoundError:
         settw.write('<login></login>')
 def mntnLogin():
     with open(cwd + '/logins.xml', 'r') as sett:
+        sett.seek(0)
         settings = ET.parse(sett)
         root = settings.getroot()
         found = root.findall(".logind")[19:]
@@ -17,9 +18,12 @@ def mntnLogin():
             root.remove(elem)
         with open (cwd + '/logins.xml', 'wb') as settw:
             settings.write(settw)
+            settw.close()
+        sett.close()
 def isLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as sett:
+        sett.seek(0)
         settings = ET.parse(sett)
         root = settings.getroot()
 ##        now = datetime.datetime.utcnow()
@@ -36,12 +40,16 @@ def isLogin(fgt):
 ##                return(True)
 ##        with open (cwd + '/logins.xml', 'wb') as settw:
 ##            settings.write(settw)
+        sett.close()
 def clearLogins():
     with open (cwd + '/logins.xml', 'w') as sett:
+        sett.seek(0)
         sett.write('<login></login>')
+        sett.close()
 def newLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as sett:
+        sett.seek(0)
         settings = ET.parse(sett)
         root = settings.getroot()
         fgt = str(fgt)
@@ -54,9 +62,11 @@ def newLogin(fgt):
             found.set('fgt', fgt)
         with open (cwd + '/logins.xml', 'wb') as settw:
             settings.write(settw)
-            
+            settw.close()
+        sett.close()
 def authenticate(passkey, fgt):
     with open(cwd + '/pvt.xml', 'r') as file:
+        file.seek(0)
         data = ET.parse(file)
         root = data.getroot()
         localkey = str(root.find(".private").attrib['key'])
@@ -68,13 +78,14 @@ def authenticate(passkey, fgt):
             return ("True")
         else:
             return ("False")
-        
+        file.close()
 def changeKey(passkey, fgt):
     clearLogins()
     localsalt = str(uuid.uuid4())
     localkey = str(hashlib.sha256((str(passkey) + localsalt).encode('utf-8')).hexdigest())
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         with open(cwd + '/pvt.xml', 'r') as file:
+            file.seek(0)
             data = ET.parse(file)
             root = data.getroot()
             found = root.find("./private")
@@ -84,7 +95,6 @@ def changeKey(passkey, fgt):
                 data.write(filew)
                 filew.close()
         return ("True")
-
 
 
     
