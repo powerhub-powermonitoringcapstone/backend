@@ -11,23 +11,18 @@ except FileNotFoundError:
 def mntnLogin():
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
-        file.seek(0)
         root = data.getroot()
         found = root.findall(".logind")[19:]
         for elem in found:
             root.remove(elem)
         with open (cwd + '/logins.xml', 'wb') as filew:
             data.write(filew)
-            filew.close()
-        file.close()
 def isLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
-        file.seek(0)
         root = data.getroot()
         found = root.find(".//logind/[@fgt={}]".format("\""+str(fgt)+"\""))
-        file.close()
         if (found == None):
             return False
         else:
@@ -36,12 +31,10 @@ def isLogin(fgt):
 def clearLogins():
     with open (cwd + '/logins.xml', 'w') as filew:
         filew.write('<login></login>')
-        filew.close()
 def newLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
-        file.seek(0)
         root = data.getroot()
         fgt = str(fgt)
 ##        now = datetime.datetime.utcnow()
@@ -53,19 +46,15 @@ def newLogin(fgt):
             found.set('fgt', fgt)
         with open (cwd + '/logins.xml', 'wb') as filew:
             data.write(filew)
-            filew.close()
-        file.close()
         
 def authenticate(passkey, fgt):
     with open(cwd + '/pvt.xml', 'r') as file:
         data = ET.parse(file)
-        file.seek(0)
         root = data.getroot()
         localkey = str(root.find(".private").attrib['key'])
         localsalt = str(root.find(".private").attrib['salt'])
         auth = passkey + localsalt
         auth = str(hashlib.sha256(auth.encode('utf-8')).hexdigest())
-        file.close()
         if (auth == localkey):
             newLogin(fgt)
             return ("True")
@@ -78,13 +67,10 @@ def changeKey(passkey, fgt):
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         with open(cwd + '/pvt.xml', 'r') as file:
             data = ET.parse(file)
-            file.seek(0)
             root = data.getroot()
             found = root.find("./private")
             found.set('key', localkey)
             found.set('salt', localsalt)
             with open (cwd + '/pvt.xml', 'wb') as filew:
                 data.write(filew)
-                filew.close()
-            file.close()
         return ("True")
