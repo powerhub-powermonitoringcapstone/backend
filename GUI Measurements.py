@@ -4,6 +4,7 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 datathread = msthread = msdata = readoutsthread = datagtest1thread = 0
 threadactive = [False,False,False,False] ##data collection, data gathering-pseudo data collection, saving, readings update
+refreshrate = 3600/int(sh.readSettings()[9])
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
         tk.Entry.__init__(self, master, **kwargs)
@@ -155,7 +156,7 @@ def data():
     sys.exit()
 
 def datagatheringtest1():
-    global threadactive, msData, notify
+    global threadactive, msData, notify, refreshrate
     x = wsigma = 0
     threadactive[3] = True
     readoutsthread = threading.Thread(target=readouts)
@@ -185,7 +186,7 @@ def datagatheringtest1():
             with open (cwd + '/measurements.xml', 'wb') as settw:
                 msFile.write(settw)
                 settw.close()
-        time.sleep(1)
+        time.sleep(refreshrate)
     print("Data gathering test 1 stopping ...")
     threadactive[3] = False
     sys.exit()
@@ -222,7 +223,7 @@ def readouts():
     sys.exit()
 
 def saving():
-    global threadstop, msthread, msData, readoutsthread, notify
+    global threadstop, msthread, msData, readoutsthread, notify, refreshrate
     msthread = threading.Thread(target=data)
     msthread.start()
     readoutsthread = threading.Thread(target=readouts)
@@ -262,7 +263,7 @@ def saving():
                 with open (cwd + '/measurements.xml', 'wb') as settw:
                     msFile.write(settw)
                     settw.close()
-            time.sleep(1)
+            time.sleep(refreshrate)
     print("Data saving stopping ...")
     threadactive[3] = False
     sys.exit()
