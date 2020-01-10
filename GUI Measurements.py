@@ -280,7 +280,7 @@ def connect():
         datathread.isAlive()
     except NameError:
         datathread = threading.Thread(target=datacollection)
-        datagtest1thread.start()
+        datathread.start()
     if (not datathread.isAlive()):
         try:
             datathread.start()
