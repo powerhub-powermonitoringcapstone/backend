@@ -2,7 +2,7 @@ import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, s
 import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
-datathread = savingthread = msdata = readoutsthread = datagtest1thread = 0
+##savingthread = msdata = readoutsthread = datagtest1thread = 0
 threadactive = [False,False,False,False] ##data collection, saving, readings update, data gathering-pseudo data collection,
 refreshrate = 3600/int(sh.readSettings()[9])
 class LabeledEntry(tk.Entry):
@@ -188,13 +188,19 @@ def datagatheringtest1():
     sys.exit()
 
 def datagtest1start():
-    global threadactive, datagtest1thread
-    if (datagtest1thread == 0):
-        datagtest1thread = threading.Thread(target=datagatheringtest1)
-    if (not datagtest1thread.isAlive()):
+    global datagtest1thread
+    try:
+        datagtest1thread.isAlive()
+    except NameError:
         datagtest1thread = threading.Thread(target=datagatheringtest1)
         datagtest1thread.start()
-
+    if (not datagtest1thread.isAlive()):
+        try:
+            datagtest1thread.start()
+        except RuntimeError:
+            datagtest1thread = threading.Thread(target=datagatheringtest1)
+            datagtest1thread.start()
+        
 def datagtest1stop():
     global threadactive
     threadactive[3] = False
@@ -264,17 +270,23 @@ def datasaving():
     sys.exit()
 
 def connect():
-    global datathread
-    permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    output = [permissions.returncode, permissions.stdout, permissions.stderr]
-    if (output[0] == 1):
-        messagebox.showerror("An error occured.", self.output[2])
-    else:
-        if (datathread == 0):
-            datathread = threading.Thread(target=datacollection)
-        if (not datathread.isAlive()):
-            datathread = threading.Thread(target=datacollection)
+    global datathread, threadactive
+    if os.geteuid == 0:
+        permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+        output = [permissions.returncode, permissions.stdout, permissions.stderr]
+        if (output[0] == 1):
+            messagebox.showerror("An error occured.", self.output[2])
+    try:
+        datathread.isAlive()
+    except NameError:
+        datathread = threading.Thread(target=datacollection)
+        datagtest1thread.start()
+    if (not datathread.isAlive()):
+        try:
             datathread.start()
+        except RuntimeError:
+            datathread = threading.Thread(target=datacollection)
+            datathread.start()        
 def stopconnect():
     global threadactive
     threadactive[0] = False
@@ -289,9 +301,12 @@ class MainInterface(tk.Frame):
 if __name__ == '__main__':
     root = tk.Tk()
 ##    root.protocol("WM_DELETE_WINDOW", stopconnect)
-    if os.geteuid() == 0:
-        wh = MainInterface(root)
-        root.mainloop()
-    else:
+    if os.geteuid() != 0:
+##        wh = MainInterface(root)
+##        root.mainloop()
+##    else:
         root.withdraw()
-        messagebox.showerror("You're not superuser", "Superuser privileges are required in order to start measurements")
+        messagebox.showerror("You're not superuser", "Issues may arise with serial read-write permissions.")
+        root.deiconify()
+    wh = MainInterface(root)
+    root.mainloop()
