@@ -12,6 +12,7 @@ def mntnLogin():
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
         root = data.getroot()
+        file.seek(0)
         found = root.findall(".logind")[19:]
         for elem in found:
             root.remove(elem)
@@ -22,6 +23,7 @@ def isLogin(fgt):
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
         root = data.getroot()
+        file.seek(0)
         found = root.find(".//logind/[@fgt={}]".format("\""+str(fgt)+"\""))
         if (found == None):
             return False
@@ -36,6 +38,7 @@ def newLogin(fgt):
     with open(cwd + '/logins.xml', 'r') as file:
         data = ET.parse(file)
         root = data.getroot()
+        file.seek(0)
         fgt = str(fgt)
 ##        now = datetime.datetime.utcnow()
 ##        nowString = (now + datetime.timedelta(minutes = 10)).strftime("%m/%d/%Y %H:%M")
@@ -51,7 +54,9 @@ def authenticate(passkey, fgt):
     with open(cwd + '/pvt.xml', 'r') as file:
         data = ET.parse(file)
         root = data.getroot()
+        file.seek(0)
         localkey = str(root.find(".private").attrib['key'])
+        file.seek(0)
         localsalt = str(root.find(".private").attrib['salt'])
         auth = passkey + localsalt
         auth = str(hashlib.sha256(auth.encode('utf-8')).hexdigest())
@@ -61,16 +66,18 @@ def authenticate(passkey, fgt):
         else:
             return ("False")
 def changeKey(passkey, fgt):
-    clearLogins()
     localsalt = str(uuid.uuid4())
     localkey = str(hashlib.sha256((str(passkey) + localsalt).encode('utf-8')).hexdigest())
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         with open(cwd + '/pvt.xml', 'r') as file:
             data = ET.parse(file)
             root = data.getroot()
+            file.seek(0)
             found = root.find("./private")
             found.set('key', localkey)
             found.set('salt', localsalt)
             with open (cwd + '/pvt.xml', 'wb') as filew:
                 data.write(filew)
         return ("True")
+    clearLogins()
+    

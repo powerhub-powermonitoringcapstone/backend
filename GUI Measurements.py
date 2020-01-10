@@ -2,8 +2,8 @@ import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, s
 import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
-datathread = msthread = msdata = readoutsthread = datagtest1thread = 0
-threadactive = [False,False,False,False] ##data collection, data gathering-pseudo data collection, saving, readings update
+datathread = savingthread = msdata = readoutsthread = datagtest1thread = 0
+threadactive = [False,False,False,False] ##data collection, saving, readings update, data gathering-pseudo data collection,
 refreshrate = 3600/int(sh.readSettings()[9])
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
@@ -124,17 +124,13 @@ class about(tk.Frame):
         self.text.pack(side="top")
         self.frame.pack()
 
-def data():
-    global threadactive
+def datacollection():
+    global threadactive, savingthread
     port = serial.Serial(measurements_.serialentry.get(), 9600)
+    savingthread = threading.Thread(target=datasaving)
+    savingthread.start()
+    threadactive[0] = True
     while threadactive[0] == True:
-##        dataq.join()
-##        dataq.put({"voltage": 230,\ ## Debugging Latency Tester
-##                   "current": 4,\
-##                   "pf": 1,\
-##                   "date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")\
-##                   }) 
-##        time.sleep(1) ##End of Latency Tester
         if (port.read(1)==b'-'):
             stuff = port.read(36).decode('ascii').split('-')[0].split('\r\n')[1:6]
             try:
@@ -152,7 +148,7 @@ def data():
                 pass
         port.flushInput()
     print("Data collection stopping ...")
-    threadactive[2] = False
+    threadactive[1] = False
     sys.exit()
 
 def datagatheringtest1():
@@ -160,7 +156,7 @@ def datagatheringtest1():
     x = wsigma = 0
     threadactive[3] = True
     readoutsthread = threading.Thread(target=readouts)
-    while threadactive[1] == True:
+    while threadactive[3] == True:
         msData = {"voltage":230,"current":5,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
         x+=1
         if (x==1):
@@ -188,12 +184,11 @@ def datagatheringtest1():
                 settw.close()
         time.sleep(refreshrate)
     print("Data gathering test 1 stopping ...")
-    threadactive[3] = False
+    threadactive[2] = False
     sys.exit()
 
 def datagtest1start():
     global threadactive, datagtest1thread
-    threadactive[1] = True
     if (datagtest1thread == 0):
         datagtest1thread = threading.Thread(target=datagatheringtest1)
     if (not datagtest1thread.isAlive()):
@@ -202,11 +197,12 @@ def datagtest1start():
 
 def datagtest1stop():
     global threadactive
-    threadactive[1] = False
+    threadactive[3] = False
 
 def readouts():
     global threadactive, msData, notify
-    while threadactive[3]==True:
+    threadactive[2]=True
+    while threadactive[2]:
         try:
             measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
             measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
@@ -222,14 +218,13 @@ def readouts():
     print("Readouts stopping ...")
     sys.exit()
 
-def saving():
-    global threadstop, msthread, msData, readoutsthread, notify, refreshrate
-    msthread = threading.Thread(target=data)
-    msthread.start()
+def datasaving():
+    global threadactive, msthread, msData, readoutsthread, notify, refreshrate
     readoutsthread = threading.Thread(target=readouts)
     x = wsigma = insig = sig =  0
     cv_ = float(sh.readSettings()[2])
-    while threadactive[2]==True:
+    threadactive[1] = True
+    while threadactive[1]==True:
         notify = "False"
         if (dataq.full()):
             msData = dataq.get()
@@ -265,20 +260,20 @@ def saving():
                     settw.close()
             time.sleep(refreshrate)
     print("Data saving stopping ...")
-    threadactive[3] = False
+    threadactive[2] = False
     sys.exit()
 
 def connect():
     global datathread
     permissions = subprocess.run("chmod 666 " + measurements_.serialentry.get(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
     output = [permissions.returncode, permissions.stdout, permissions.stderr]
-    if (self.output[0] == 1):
+    if (output[0] == 1):
         messagebox.showerror("An error occured.", self.output[2])
     else:
         if (datathread == 0):
-            datathread = threading.Thread(target=saving)
+            datathread = threading.Thread(target=datacollection)
         if (not datathread.isAlive()):
-            datathread = threading.Thread(target=saving)
+            datathread = threading.Thread(target=datacollection)
             datathread.start()
 def stopconnect():
     global threadactive
