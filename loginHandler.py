@@ -31,8 +31,15 @@ def isLogin(fgt):
             return True
         
 def clearLogins():
-    with open (cwd + '/logins.xml', 'w') as filew:
-        filew.write('<login></login>')
+    with open(cwd + '/logins.xml', 'r') as file:
+        file.seek(0)
+        data = ET.parse(file)
+        root = data.getroot()
+        found = root.findall(".logind")
+        for elem in found:
+            root.remove(elem)
+        with open (cwd + '/logins.xml', 'wb') as filew:
+            data.write(filew)
 def newLogin(fgt):
     mntnLogin()
     with open(cwd + '/logins.xml', 'r') as file:
@@ -77,6 +84,6 @@ def changeKey(passkey, fgt):
             found.set('salt', localsalt)
             with open (cwd + '/pvt.xml', 'wb') as filew:
                 data.write(filew)
+            clearLogins()
         return ("True")
-    clearLogins()
     

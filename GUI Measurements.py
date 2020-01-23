@@ -43,8 +43,17 @@ class viewchanger(tk.Frame):
     def teardown(self):
         try:
             measurements_.frame.destroy()
+        except (NameError, AttributeError) as e:
+            pass
+        try:
             datagathering_.frame.destroy()
+        except (NameError, AttributeError) as e:
+            pass
+        try:
             notifs_.frame.destroy()
+        except (NameError, AttributeError) as e:
+            pass
+        try:
             about__.frame.destroy()
         except (NameError, AttributeError) as e:
             pass
