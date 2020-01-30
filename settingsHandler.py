@@ -6,7 +6,7 @@ setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
 d = {'IsSetup':0,'DataLogging':1,'SensitivityThreshold':2\
      ,'Debug':3, 'NodeName':4, 'Version':5 , 'NodeType':6,\
-     'Permanence':7, 'CarbonFootprint':8, 'RefreshRate':9, 'KilowattLimit':10}
+     'Permanence':7, 'CarbonFootprint':8, 'RefreshRate':9, 'KilowattLimit':10, 'KilowattLimitEnabled':11}
 try:
     sett = open(cwd+'/settings.xml', 'r')
     sett.close()
@@ -35,8 +35,7 @@ def readSettings():
         x = 0
         for element in root:
             try:
-                c = d[root[x].attrib['name']]
-                setArray[c] = root[x].text
+                setArray[d[root[x].attrib['name']]] = root[x].text
             except KeyError:
                 pass
             x +=1
