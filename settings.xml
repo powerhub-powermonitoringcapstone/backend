@@ -6,7 +6,7 @@
     <main name="DataLogging">True</main>
     <main name="Debug">False</main>
     <main name="CarbonFootprint">7.47</main>
-    <main name="KilowattLimit">506.12</main>
+    <main name="KilowattLimit">2</main>
     <main name="KilowattLimitEnabled">True</main>
     
     <server name="NodeName">PowerHub_Testing</server>

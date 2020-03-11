@@ -166,7 +166,7 @@ def datagatheringtest1():
     threadactive[3] = True
     readoutsthread = threading.Thread(target=readouts)
     while threadactive[3] == True:
-        msData = {"voltage":230,"current":5,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
+        msData = {"voltage":230,"current":100,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
         x+=1
         if (x==1):
             readoutsthread.start()
