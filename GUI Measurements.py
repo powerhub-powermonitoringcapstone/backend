@@ -1,5 +1,5 @@
 import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, sys
-import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh
+import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh, portalocker
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 ##savingthread = msdata = readoutsthread = datagtest1thread = 0
@@ -174,23 +174,29 @@ def datagatheringtest1():
             notify = "True"
         else:
             notify = "False"
-        with open(cwd+'/measurements.xml', 'r') as sett:
-            msFile = ET.parse(sett)
-            root = msFile.getroot()
-            cv = msData["voltage"] * msData["current"] * msData["pf"]
-            wsigma += cv
+        lock = False
+        while lock == False:
             try:
-                cv /= (wsigma/x)
-                cv *= 100
-                cv -= 100
-            except ZeroDivisionError:
+                with portalocker.Lock(cwd + '/measurements.xml', 'r') as sett:   
+                    msFile = ET.parse(sett)
+                    root = msFile.getroot()
+                    cv = msData["voltage"] * msData["current"] * msData["pf"]
+                    wsigma += cv
+                    try:
+                        cv /= (wsigma/x)
+                        cv *= 100
+                        cv -= 100
+                    except ZeroDivisionError:
+                        pass
+                    root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
+                                                   'variation':str(cv), 'date': msData["date"],\
+                                                   'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
+                    with open (cwd + '/measurements.xml', 'wb') as settw:
+                        msFile.write(settw)
+                        settw.close()
+                lock = True
+            except portalocker.exceptions.LockException:
                 pass
-            root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
-                                           'variation':str(cv), 'date': msData["date"],\
-                                           'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
-            with open (cwd + '/measurements.xml', 'wb') as settw:
-                msFile.write(settw)
-                settw.close()
         time.sleep(refreshrate)
     print("Data gathering test 1 stopping ...")
     threadactive[2] = False
@@ -241,38 +247,45 @@ def datasaving():
     threadactive[1] = True
     while threadactive[1]==True:
         notify = "False"
+
         if (dataq.full()):
             msData = dataq.get()
             dataq.task_done()
             x+=1
             if (x==1):
                 readoutsthread.start()
-            with open(cwd+'/measurements.xml', 'r') as sett:
-                msFile = ET.parse(sett)
-                root = msFile.getroot()
-                cv = msData["voltage"] * msData["current"] * msData["pf"]
-                wsigma += cv
+            lock = False
+            while lock == False:
                 try:
-                    cv /= (wsigma/x)
-                    cv *= 100
-                    cv -= 100
-                except ZeroDivisionError:
+                    with portalocker.Lock(cwdf + '/measurements.xml', 'r+') as measfile:
+                        meas = ET.parse(measfile)
+                        root = meas.getroot()
+                        cv = msData["voltage"] * msData["current"] * msData["pf"]
+                        wsigma += cv
+                        try:
+                            cv /= (wsigma/x)
+                            cv *= 100
+                            cv -= 100
+                        except ZeroDivisionError:
+                            pass
+                        if (insig > 11):
+                            insig = 0
+                        if (cv >= cv_):
+                            sig += 1
+                        else:
+                            insig += 1
+                        if (sig >= 8 and insig <= 5):
+                            sig = insig = 0
+                            notify = "True"
+                        time.sleep(5)
+                        root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
+                                                       'variation':str(cv), 'date': msData["date"],\
+                                                       'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
+                        with open (cwd + '/measurements.xml', 'wb') as settw:
+                            meas.write(settw)
+                    lock = True
+                except portalocker.LockException:
                     pass
-                if (insig > 11):
-                    insig = 0
-                if (cv >= cv_):
-                    sig += 1
-                else:
-                    insig += 1
-                if (sig >= 8 and insig <= 5):
-                    sig = insig = 0
-                    notify = "True"
-                root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
-                                               'variation':str(cv), 'date': msData["date"],\
-                                               'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))
-                with open (cwd + '/measurements.xml', 'wb') as settw:
-                    msFile.write(settw)
-                    settw.close()
             time.sleep(refreshrate)
     print("Data saving stopping ...")
     threadactive[2] = False
