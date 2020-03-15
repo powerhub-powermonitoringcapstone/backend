@@ -1,9 +1,9 @@
 import tkinter as tk, threading, tkinter.messagebox as messagebox, subprocess, sys
-import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh, portalocker
+import os, platform, numpy, datetime, time, threading, queue, math, xml.etree.ElementTree as ET, tkinter as tk, serial, settingsHandler as sh, portalocker, smtplib, ssl
 cwd = os.path.dirname(os.path.realpath(__file__))
 dataq = queue.Queue(1)
 ##savingthread = msdata = readoutsthread = datagtest1thread = 0
-threadactive = [False,False,False,False] ##data collection, saving, readings update, data gathering-pseudo data collection,
+threadactive = [False,False,False,False,False] ##data collection, saving, readings update, data gathering-pseudo data collection, email subprogram
 refreshrate = 3600/int(sh.readSettings()[9])
 class LabeledEntry(tk.Entry):
     def __init__(self, master, label, **kwargs):
@@ -160,6 +160,19 @@ def datacollection():
     threadactive[1] = False
     sys.exit()
 
+def email(function):
+    global threadactive, msData
+    threadactive[4] = True
+    context = ssl.create_default_context()
+    print("should send email")
+    if (function == "peak"):
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:            
+            server.login("powerhubwebmaster@gmail.com", "elyagayle")
+            server.sendmail("powerhubwebmaster@gmail.com", "powerhubwebmaster@gmail.com", "Subject: Load Peak Detected at " + msData["date"]\
+                                        + "\n\n" + "This message is to notify that a significant load peak was detected at"+ msData["date"]+".\n\n"\
+                                        "---------------------------\nSystem-generated message. Please do not reply.")
+    threadactive[4] = False
+
 def datagatheringtest1():
     global threadactive, msData, notify, refreshrate
     x = wsigma = 0
@@ -174,6 +187,9 @@ def datagatheringtest1():
             notify = "True"
         else:
             notify = "False"
+        if (notify == "True"):
+            emailthread = threading.Thread(target=email, args=["peak"])
+            emailthread.start()
         lock = False
         while lock == False:
             try:
@@ -257,7 +273,7 @@ def datasaving():
             lock = False
             while lock == False:
                 try:
-                    with portalocker.Lock(cwdf + '/measurements.xml', 'r+') as measfile:
+                    with portalocker.Lock(cwd + '/measurements.xml', 'r+') as measfile:
                         meas = ET.parse(measfile)
                         root = meas.getroot()
                         cv = msData["voltage"] * msData["current"] * msData["pf"]
@@ -277,7 +293,6 @@ def datasaving():
                         if (sig >= 8 and insig <= 5):
                             sig = insig = 0
                             notify = "True"
-                        time.sleep(5)
                         root.append(ET.Element("plot",{'voltage':str(msData["voltage"]),'current':str(msData["current"]),\
                                                        'variation':str(cv), 'date': msData["date"],\
                                                        'n': str(x), 'mu': str(wsigma/x), 'notify': str(notify), 'pf':str(msData["pf"])}))

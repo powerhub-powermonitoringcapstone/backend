@@ -87,7 +87,7 @@ def changeKey(passkey, fgt):
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         try:
             with portalocker.Lock(cwd + '/pvt.xml', 'r') as authfile:
-                data = ET.parse(auth)
+                data = ET.parse(authfile)
                 root = data.getroot()
                 found = root.find("./private")
                 found.set('key', localkey)

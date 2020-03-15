@@ -6,11 +6,22 @@
     <main name="DataLogging">True</main>
     <main name="Debug">False</main>
     <main name="CarbonFootprint">7.47</main>
-    <main name="KilowattLimit">2</main>
+    <main name="KilowattLimit">128</main>
     <main name="KilowattLimitEnabled">True</main>
     
     <server name="NodeName">PowerHub_Testing</server>
     <server name="Version">1.25b</server>
     <server name="NodeType">Central</server>
     <server name="Permanence">60</server>
+
+    <email name="EmailAddress1"></email>
+    <email name="EmailAddress2"></email>
+    <email name="EmailAddress3"></email>
+    <email name="EmailAddress4"></email>
+    <email name="EmailAddress5"></email>
+    <email name="EmailAddress6"></email>
+    <email name="EmailAddress7"></email>
+    <email name="EmailAddress8"></email>
+    <email name="EmailAddress9"></email>
+    <email name="EmailAddress10"></email>
 </settings>
