@@ -168,8 +168,9 @@ def email(function):
     if (function == "peak"):
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:            
             server.login("powerhubwebmaster@gmail.com", "elyagayle")
-            server.sendmail("powerhubwebmaster@gmail.com", "powerhubwebmaster@gmail.com", "Subject: Load Peak Detected at " + msData["date"]\
-                                        + "\n\n" + "This message is to notify that a significant load peak was detected at"+ msData["date"]+".\n\n"\
+            for emails in list(range(12,22)):
+                server.sendmail("powerhubwebmaster@gmail.com", sh.readSettings()[emails], "Subject: [PowerHub] Load Peak Detected at " + msData["date"]\
+                                        + "\n\n" + "This message is to notify that a significant load peak was detected at "+ msData["date"]+".\n\n"\
                                         "---------------------------\nSystem-generated message. Please do not reply.")
     threadactive[4] = False
 
