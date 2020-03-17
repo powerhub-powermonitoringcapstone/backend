@@ -21,7 +21,7 @@ def isLogin(fgt):
             with portalocker.Lock(cwd + '/logins.xml', 'r+') as loginfile:
                 data = ET.parse(loginfile)
                 root = data.getroot()
-                found = root.findall(".logind")[19:]
+                found = root.findall(".logind")[20:]
                 for elem in found:
                     root.remove(elem)
                 data.write(cwd + '/logins.xml')
@@ -55,7 +55,7 @@ def newLogin(fgt):
             with portalocker.Lock(cwd + '/logins.xml', 'r+') as loginfile:
                 data = ET.parse(loginfile)
                 root = data.getroot()
-                found = root.findall(".logind")[19:]
+                found = root.findall(".logind")[20:]
                 for elem in found:
                     root.remove(elem)
                 fgt = str(fgt)

@@ -6,22 +6,14 @@
     <main name="DataLogging">True</main>
     <main name="Debug">False</main>
     <main name="CarbonFootprint">7.47</main>
-    <main name="KilowattLimit">128</main>
+    <main name="KilowattLimit">1</main>
     <main name="KilowattLimitEnabled">True</main>
     
     <server name="NodeName">PowerHub_Testing</server>
     <server name="Version">1.25b</server>
     <server name="NodeType">Central</server>
-    <server name="Permanence">60</server>
+    <server name="Permanence">120</server>
 
     <email name="EmailAddress1">wrcsstudiokhalil@gmail.com</email>
-    <!-- <email name="EmailAddress2">shi</email>
-    <email name="EmailAddress3">sales</email>
-    <email name="EmailAddress4">porn</email>
-    <email name="EmailAddress5">hub</email>
-    <email name="EmailAddress6">com</email>
-    <email name="EmailAddress7">porn</email>
-    <email name="EmailAddress8">hub</email>
-    <email name="EmailAddress9">com</email>
-    <email name="EmailAddress10">porn</email> -->
+    
 </settings>
