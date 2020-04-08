@@ -170,6 +170,7 @@ def email(function):
             server.sendmail("powerhubwebmaster@gmail.com", "powerhubwebmaster@gmail.com", "Subject: [PowerHub] Load Peak Detected at " + msData["date"]\
                                         + "\n\n" + "This message is to notify that a significant load peak was detected at "+ msData["date"]+".\n\n"\
                                         "---------------------------\nSystem-generated message. Please do not reply.") ##send email
+        print("Successfully sent email")
     threadactive[4] = False
 
 def datagatheringtest1():
@@ -177,13 +178,14 @@ def datagatheringtest1():
     x = wsigma = 0
     threadactive[3] = True
     readoutsthread = threading.Thread(target=readouts)
+    msData = {"voltage":230,"current":100,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
+    readoutsthread.start()
+    time.sleep(5)
     while threadactive[3] == True:
         msData = {"voltage":230,"current":100,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
         x+=1
-        if (x==1):
-            readoutsthread.start()
-        if (x==101):
-            threadactive[3] = False
+##        if (x==1000):
+##            threadactive[3] = False
         if (x % 10 == 0):
             notify = "True"
         else:
