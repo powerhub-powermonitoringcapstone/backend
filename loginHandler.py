@@ -18,7 +18,8 @@ def isLogin(fgt):
     lock = False
     while lock == False:
         try:
-            with portalocker.Lock(cwd + '/logins.xml', 'r+') as loginfile:
+            with portalocker.Lock(cwd + '/logins.xml', 'r') as loginfile:
+                lock = True
                 data = ET.parse(loginfile)
                 root = data.getroot()
                 found = root.findall(".logind")[20:]
@@ -26,7 +27,6 @@ def isLogin(fgt):
                     root.remove(elem)
                 data.write(cwd + '/logins.xml')
                 found = root.find(".//logind/[@fgt={}]".format("\""+str(fgt)+"\""))
-            lock = True
         except portalocker.exceptions.LockException:
             pass
     if (found == None):
@@ -37,7 +37,8 @@ def clearLogins():
     lock = False
     while lock == False:
         try:
-            with portalocker.Lock(cwd + '/logins.xml', 'r+') as loginfile:
+            with portalocker.Lock(cwd + '/logins.xml', 'r') as loginfile:
+                lock = True
                 data = ET.parse(loginfile)
                 root = data.getroot()
                 found = root.findall(".logind")
@@ -45,14 +46,14 @@ def clearLogins():
                     root.remove(elem)
                 with open (cwd + '/logins.xml', 'wb') as filew:
                     data.write(cwd + '/logins.xml')
-            lock = True
         except portalocker.exceptions.LockException:
             pass 
 def newLogin(fgt):
     lock = False
     while lock == False:
         try:
-            with portalocker.Lock(cwd + '/logins.xml', 'r+') as loginfile:
+            with portalocker.Lock(cwd + '/logins.xml', 'r') as loginfile:
+                lock = True
                 data = ET.parse(loginfile)
                 root = data.getroot()
                 found = root.findall(".logind")[20:]
@@ -65,7 +66,6 @@ def newLogin(fgt):
                 else:
                     found.set('fgt', fgt)
                 data.write(cwd + '/logins.xml')
-            lock = True
         except portalocker.exceptions.LockException:
             pass 
 
@@ -87,6 +87,7 @@ def changeKey(passkey, fgt):
     if (isLogin(fgt) or sh.readSettings()[0] == "False"):
         try:
             with portalocker.Lock(cwd + '/pvt.xml', 'r') as authfile:
+                lock = True
                 data = ET.parse(authfile)
                 root = data.getroot()
                 found = root.find("./private")
@@ -94,7 +95,6 @@ def changeKey(passkey, fgt):
                 found.set('salt', localsalt)
                 data.write(cwd + '/pvt.xml')
                 clearLogins()                
-            lock = True
         except portalocker.exceptions.LockException:
             pass         
         return ("True")

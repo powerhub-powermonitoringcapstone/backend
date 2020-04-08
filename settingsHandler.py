@@ -1,6 +1,5 @@
 from xml.dom import minidom
-import xml.etree.ElementTree as ET
-import os, platform, numpy
+import xml.etree.ElementTree as ET, portalocker, os, platform, numpy
 cwd = os.path.dirname(os.path.realpath(__file__))
 setArray = numpy.empty((30), dtype=object)
 setWarray = numpy.empty((30), dtype=object)
@@ -17,31 +16,43 @@ except IOError:
         sett.write("<settings></settings>")
         sett.close()
 def riteSettings(f, g): ##index number, pamalit na value
-    settings = ET.parse(cwd + '/settings.xml')
-    root = settings.getroot()
-    x = y = 0
-    f = int(f)
-    for element in root:
+    lock = False
+    while lock == False:
         try:
-            if (f == d[root[x].attrib['name']]):
-                root[x].text = g
-        except KeyError:
+            with portalocker.Lock(cwd + '/settings.xml', 'r') as settfile:
+                lock = True
+                settings = ET.parse(settfile)
+                root = settings.getroot()
+                x = y = 0
+                f = int(f)
+                for element in root:
+                    try:
+                        if (f == d[root[x].attrib['name']]):
+                            root[x].text = g
+                    except KeyError:
+                        pass
+                    x+=1## wala pang data validity checker ah
+                with open(cwd+'/settings.xml', 'wb') as sett:             
+                    settings.write(sett)
+        except portalocker.exceptions.LockException:
             pass
-        x+=1
-    with open(cwd+'/settings.xml', 'wb') as sett:             
-        settings.write(sett)
-    ## wala pang data validity checker ah
 def readSettings():
-    settings = ET.parse(cwd +'/settings.xml')
-    root = settings.getroot()
-    emails = []
-    x = 0
-    for element in root:
+    lock = False
+    while lock == False:
         try:
-            setArray[d[root[x].attrib['name']]] = root[x].text
-        except KeyError:
+            with portalocker.Lock(cwd +'/settings.xml', 'r') as settfile:
+                lock = True
+                settings = ET.parse(settfile)
+                root = settings.getroot()
+                x = 0
+                for element in root:
+                    try:
+                        setArray[d[root[x].attrib['name']]] = root[x].text
+                    except KeyError:
+                        pass
+                    x+=1
+        except portalocker.exceptions.LockException:
             pass
-        x+=1
     #sanity checks here
     return setArray
 

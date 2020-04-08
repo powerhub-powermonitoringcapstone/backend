@@ -164,14 +164,12 @@ def email(function):
     global threadactive, msData
     threadactive[4] = True
     context = ssl.create_default_context()
-    print("should send email")
-    if (function == "peak"):
+    if (function == "peak"): ## peak notification email
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:            
-            server.login("powerhubwebmaster@gmail.com", "elyagayle")
-            for emails in list(range(12,22)):
-                server.sendmail("powerhubwebmaster@gmail.com", "powerhubwebmaster@gmail.com", "Subject: [PowerHub] Load Peak Detected at " + msData["date"]\
+            server.login("powerhubwebmaster@gmail.com", "elyagayle") ## login to server
+            server.sendmail("powerhubwebmaster@gmail.com", "powerhubwebmaster@gmail.com", "Subject: [PowerHub] Load Peak Detected at " + msData["date"]\
                                         + "\n\n" + "This message is to notify that a significant load peak was detected at "+ msData["date"]+".\n\n"\
-                                        "---------------------------\nSystem-generated message. Please do not reply.")
+                                        "---------------------------\nSystem-generated message. Please do not reply.") ##send email
     threadactive[4] = False
 
 def datagatheringtest1():
@@ -184,12 +182,14 @@ def datagatheringtest1():
         x+=1
         if (x==1):
             readoutsthread.start()
+        if (x==101):
+            threadactive[3] = False
         if (x % 10 == 0):
             notify = "True"
         else:
             notify = "False"
-        if (notify == "True"):
-            emailthread = threading.Thread(target=email, args=["peak"])
+        if (notify == "True"): ## if notification is triggered
+            emailthread = threading.Thread(target=email, args=["peak"]) ##start email thread
             emailthread.start()
         lock = False
         while lock == False:
@@ -245,7 +245,7 @@ def readouts():
             measurements_.voltage.config(text='Voltage: ' + str(msData['voltage']) + " V")
             measurements_.current.config(text='Current: ' + str(msData['current']) + " A")
             measurements_.pf.config(text='Power Factor: ' + str(msData['pf']))
-            measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf'])[:4] + " W")
+            measurements_.wattage.config(text='Wattage: ' + str(msData['voltage'] * msData['current'] * msData['pf']) + " W")
             if (notify == "True"):
                 measurements_.notification.config(text='Significant Load')
             else:
