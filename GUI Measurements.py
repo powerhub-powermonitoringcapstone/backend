@@ -84,9 +84,11 @@ class measurements(tk.Frame):
         self.serialentry = LabeledEntry(self.serialframe, label="Serial port here")
         self.start = tk.Button(self.serialframe, text="Start", command=connect)#self.update)
         self.stop = tk.Button(self.serialframe, text="Stop", command=stopconnect)
+        self.reset= tk.Button(self.serialframe, text="Clear file", command=datagtest1reset)
         self.serialentry.grid(row=0,column=0)
         self.start.grid(row=0, column=1)
         self.stop.grid(row=0, column=2)
+        self.reset.grid(row=0, column=3)
         self.serialframe.pack(side="top")
         self.voltage = tk.Label(self.readoutsframe, text="Voltage: --- V")
         self.voltage.pack(anchor=tk.W)
@@ -108,9 +110,11 @@ class datagathering(tk.Frame):
         self.test1 = tk.Label(self.frame, text="Notification Framework Test")
         self.test1b = tk.Button(self.frame, text="Start", command=datagtest1start)
         self.test1bs = tk.Button(self.frame, text="Stop", command=datagtest1stop)
+        self.test1brs= tk.Button(self.frame, text="Clear file", command=datagtest1reset)
         self.test1.grid(row=0,column=0)
         self.test1b.grid(row=0,column=1)
         self.test1bs.grid(row=0,column=2)
+        self.test1brs.grid(row=0,column=3)
         self.frame.pack(anchor=tk.NW)
 
 class notifs(tk.Frame):
@@ -180,7 +184,7 @@ def datagatheringtest1():
     readoutsthread = threading.Thread(target=readouts)
     msData = {"voltage":230,"current":100,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
     readoutsthread.start()
-    time.sleep(5)
+##    time.sleep(5)
     while threadactive[3] == True:
         msData = {"voltage":230,"current":100,"pf":1,"date": datetime.datetime.now(datetime.timezone.utc).strftime("%m/%d/%Y %H:%M:%S")}
         x+=1
@@ -238,7 +242,20 @@ def datagtest1start():
 def datagtest1stop():
     global threadactive
     threadactive[3] = False
-
+    
+def datagtest1reset():
+    global threadactive
+    if (threadactive[3] == False and threadactive[0] == False):
+        lock = False
+        while lock == False:
+            try:
+                with portalocker.Lock(cwd + '/measurements.xml', 'w') as measfile:
+                    lock = True
+                    measfile.write("<measurements></measurements>")
+            except portalocker.exceptions.LockException:
+                pass
+    else:
+        messagebox.showerror("Operations still ongoing", "Please stop all ongoing logging processes first.")        
 def readouts():
     global threadactive, msData, notify
     threadactive[2]=True
